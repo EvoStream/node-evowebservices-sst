@@ -303,8 +303,8 @@ router.get('/live', function (req, res, next) {
             winston.log("error", '[evowebservices-sst] find - there are no existing camera streams');
         }
 
-        delete result["meta"];
-        delete result["$loki"];
+        delete result[0]["meta"];
+        delete result[0]["$loki"];
 
         res.json(result);
 
