@@ -1,0 +1,16 @@
+{
+    "edge":
+    {
+        "localIps": [
+            "10.10.0.5",
+            "10.10.0.6"
+        ],
+        "publicIp": "13.94.41.184",
+        "apiproxy": "apiproxy",
+        "username": "evostream",
+        "password": "Pa$$word",
+        "port": "8888",
+        "apiproxyUrl": "http://evostream:Pa$$word@10.10.0.5:8888/apiproxy"
+    }
+}
+

@@ -1,0 +1,36 @@
+/***
+ * 
+ * EvoStream Web Services
+ * EvoStream, Inc.
+ * (c) 2016 by EvoStream, Inc. (support@evostream.com)
+ * Released under the MIT License
+ * 
+ ***/
+
+/*
+ * --------------------------------------------------------------------------
+ * Configurations for Winston Logging
+ * --------------------------------------------------------------------------
+ * logging is only for a File transport
+ * level:
+ * There are 6 default levels in winston: 
+ *   level 0 = silly (lowest)
+ *   level 1 = debug
+ *   level 2 = verbose
+ *   level 3 = info
+ *   level 4 = warn
+ *   level 5 = error (highest)
+ * filename = the absolute path of the file where the logs is stored
+ * handleExceptions = Handling Uncaught Exceptions with winston
+ * json = log files are in json format
+ * maxsize = maximum size of the log file
+ * 
+ */
+{
+  "options": {
+    "level": "silly",    
+    "handleExceptions": true,
+    "json": false,
+    "maxsize": 5242880
+  }
+}
