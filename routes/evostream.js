@@ -22,12 +22,6 @@ var fs = require('fs');
 var winston = require('winston');
 winston.log("info", "[evowebservices-sst] starting evowebservices:server listening on port 4000 ");
 
-
-//Ip Configuration
-var edgeConfigFile = path.join(__dirname, '../config/edge-config.json');
-
-var edgeConfig = jsonComment.parse(fs.readFileSync(edgeConfigFile), null, true);
-
 //using portable database
 var cameraStream = require(path.join(__dirname, '../models/camera-stream'));
 var edge = require(path.join(__dirname, '../models/edge'));
@@ -71,37 +65,56 @@ router.post('/', function (req, res, next) {
     if (eventType == 'inStreamCreated') {
 
         winston.log("info", '[evowebservices-sst] AzureStreamManager-SST inStreamCreated');
-        winston.log("info", '[evowebservices-sst] AzureStreamManager-SST inStreamCreated here ' + JSON.stringify(event));
+        winston.log("info", '[evowebservices-sst] AzureStreamManager-SST inStreamCreated event data: ' + JSON.stringify(event));
 
         //calculate port
         var localIp = event.payload.ip;
         var subnet = localIp.split(".");
 
-        var portStart = 48410;
-        var portUnit = 5 - parseInt(subnet[3]);
-        var port = portStart + portUnit;
-        var publicIp = edgeConfig.edge.publicIp;
 
-        var data = {
-            "streamname": event.payload.name,
-            "publicIp": publicIp,
-            "localIp": event.payload.nearIp,
-            "port": port
-        };
+        // var publicIp = edgeConfig.edge.publicIp;
 
-        winston.log("verbose", "data " + JSON.stringify(data));
+        //get the publicIp
+        edge.find(localIp, function (response) {
 
-        //Store the camera stream
-        cameraStream.create(data, function (response) {
+            var result = response;
 
-            winston.log("verbose", "camera stream created response" + JSON.stringify(response));
+            winston.log("verbose", "result " + JSON.stringify(result));
 
-            if (typeof response[0] !== "undefined") {
-                winston.log("verbose", '[evowebservices-sst] camera stream added - data ' + JSON.stringify(data));
-            } else {
+            if(!result.error) {
+                var publicIp = result.publicIp;
 
-                winston.log("error", '[evowebservices-sst] camera stream not added - data ' + JSON.stringify(data));
+                var portStart = 48410;
+                var portUnit = parseInt(subnet[3]) - 5;
+                var port = portStart + portUnit;
 
+                winston.log("verbose", "portStart " +portStart );
+                winston.log("verbose", "portUnit " +portUnit );
+                winston.log("verbose", "parseInt(subnet[3]) " +parseInt(subnet[3]) );
+                winston.log("verbose", "port " +port );
+
+                var data = {
+                    "streamname": event.payload.name,
+                    "publicIp": publicIp,
+                    "localIp": event.payload.nearIp,
+                    "port": port
+                };
+
+                winston.log("verbose", "data " + JSON.stringify(data));
+
+                //Store the camera stream
+                cameraStream.create(data, function (response) {
+
+                    winston.log("verbose", "camera stream created response" + JSON.stringify(response));
+
+                    if (typeof response[0] !== "undefined") {
+                        winston.log("verbose", '[evowebservices-sst] camera stream added - data ' + JSON.stringify(data));
+                    } else {
+
+                        winston.log("error", '[evowebservices-sst] camera stream not added - data ' + JSON.stringify(data));
+
+                    }
+                });
             }
         });
     }
@@ -110,20 +123,10 @@ router.post('/', function (req, res, next) {
     if (eventType == 'vmCreated') {
 
         winston.log("info", '[evowebservices-sst] AzureStreamManager-SST vmCreated');
-        winston.log("info", '[evowebservices-sst] AzureStreamManager-SST vmCreated data ' + JSON.stringify(event));
+        winston.log("info", '[evowebservices-sst] AzureStreamManager-SST vmCreated event ' + JSON.stringify(event));
 
         var serverObjectPort = '8888';
         var serverObjectUserName = 'evostream';
-
-        var edgeObject = {};
-
-        edgeObject.localIps.push(event.localIp);
-        edgeObject.publicIp = event.publicIp;
-        edgeObject.apiproxy = event.payload.apiproxy;
-        edgeObject.username = serverObjectUserName;
-        edgeObject.password = event.payload.password;
-        edgeObject.port = serverObjectPort;
-
         var localIp = event.localIp;
 
         var data = {
@@ -134,6 +137,7 @@ router.post('/', function (req, res, next) {
             "port": serverObjectPort
         };
 
+        winston.log("info", '[evowebservices-sst] AzureStreamManager-SST vmCreated data ' + JSON.stringify(data));
 
         edge.create(localIp, data, function (response) {
 
@@ -214,6 +218,11 @@ router.post('/', function (req, res, next) {
                                             var portUnit = 5 - parseInt(subnet[3]);
                                             var port = portStart + portUnit;
 
+                                            winston.log("verbose", "portStart " +portStart );
+                                            winston.log("verbose", "portUnit " +portUnit );
+                                            winston.log("verbose", "parseInt(subnet[3]) " +parseInt(subnet[3]) );
+                                            winston.log("verbose", "port " +port );
+
                                             var data = {
                                                 "streamname": stream.name,
                                                 "publicIp" : publicIp,
@@ -238,8 +247,6 @@ router.post('/', function (req, res, next) {
                                         }else{
                                             next();
                                         }
-
-
                                     })
                                 }else{
                                     next();
