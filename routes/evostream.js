@@ -81,7 +81,7 @@ router.post('/', function (req, res, next) {
 
             winston.log("verbose", "result " + JSON.stringify(result));
 
-            if(!result.error) {
+            if(!result.error ) {
                 var publicIp = result.publicIp;
 
                 var portStart = 48410;
@@ -291,11 +291,11 @@ router.get('/live', function (req, res, next) {
 
     cameraStream.find(streamname, function (response) {
 
-        winston.log("verbose", "camera stream found " + JSON.stringify(response));
+        winston.log("verbose", "camera stream found: " + JSON.stringify(response));
 
         var result = response;
 
-        if (response == null) {
+        if ((typeof(response) == "undefined") || response.length == 0) {
             result = {
                 error: 'there are no existing camera streams'
             };
@@ -310,8 +310,10 @@ router.get('/live', function (req, res, next) {
             winston.log("error", '[evowebservices-sst] find - there are no existing camera streams');
         }
 
-        delete result[0]["meta"];
-        delete result[0]["$loki"];
+        if(response.length > 0){
+            delete result[0]["meta"];
+            delete result[0]["$loki"];
+        }
 
         res.json(result);
 
@@ -430,180 +432,180 @@ router.get('/remove-testing', function (req, res, next) {
 });
 
 
-router.get('/create-edge', function (req, res, next) {
-
-    // var name = req.body.name;
-    //
-    // console.log('name '+name );
-
-    var localIp = "10.10.0.5";
-
-    var data = {
-        "publicIp": "13.94.41.184",
-        "apiproxy": "apiproxy",
-        "username": "evostream",
-        "password": "Pa$$word",
-        "port": "8888"
-    };
-
-
-    edge.create(localIp, data, function (response) {
-
-        var result = response;
-
-        res.json(result);
-
-    })
-
-});
-
-
-router.get('/update-camerastreamlist', function (req, res, next) {
+// router.get('/create-edge', function (req, res, next) {
+//
+//     // var name = req.body.name;
+//     //
+//     // console.log('name '+name );
+//
+//     var localIp = "10.10.0.5";
+//
+//     var data = {
+//         "publicIp": "13.94.41.184",
+//         "apiproxy": "apiproxy",
+//         "username": "evostream",
+//         "password": "Pa$$word",
+//         "port": "8888"
+//     };
+//
+//
+//     edge.create(localIp, data, function (response) {
+//
+//         var result = response;
+//
+//         res.json(result);
+//
+//     })
+//
+// });
 
 
-    //Get the edge information
-    
-
-    var localIp = "10.10.0.6";
-
-    var data = {
-        "publicIp": "13.94.41.184",
-        "apiproxy": "apiproxy",
-        "username": "evostream",
-        "password": "Pa$$word",
-        "port": "8888"
-    };
-
-
-    edge.find(localIp, function (response) {
-
-        var result = response;
-
-        // res.json(result);
-
-        if(!result.error){
-
-            //build the api proxy url
-            var serverObject = {
-                "localIp": localIp,
-                "apiproxy": result.apiproxy,
-                "username": result.username,
-                "password": result.password,
-                "port": result.port
-            };
-
-            var publicIp = result.publicIp;
-
-
-            var apiProxyUrl = getUrlApiProxy(serverObject);
-
-            winston.log("verbose", "apiProxyUrl " +apiProxyUrl );
-
-            if(apiProxyUrl != ''){
-
-                var ems = require("../core_modules/ems-api-core")(apiProxyUrl);
-                var parameters = null;
-
-                ems.listStreams(parameters, function (result) {
-
-                    winston.log("verbose", "[evowebservices-sst] AzureStreamManager-SST listConfig result: " + JSON.stringify(result));
-
-                    if (result.status == "FAIL" || (result.data == null )) {
-                        winston.log("error", "[evowebservices-sst] AzureStreamManager-SST listConfig failed result: " + JSON.stringify(result));
-                    } else {
-
-                        var listStreamData = result.data;
-
-                        //loop to the liststreamdata
-                        asyncLoop(listStreamData, function (stream, next)
-                        {
-                            winston.log("verbose", "stream " + JSON.stringify(stream));
-                            // var publicIp = edge.getPublicIp();
-
-                            winston.log("verbose", "publicIp " + publicIp);
-
-                            if(stream.type == 'INR'){
-
-                                cameraStream.find(stream.name, function (response) {
-
-                                    winston.log("verbose", "find cameraStream response " + JSON.stringify(response));
-
-                                    if (typeof response ['error'] !== "undefined") {
-                                        winston.log("error", '[evowebservices-sst] camera stream not added - data ' + JSON.stringify(data));
-
-                                        next();
-                                    }
-
-                                    winston.log("verbose", "find cameraStream response response.length " +response.length);
-
-                                    if (response.length < 1) {
-
-                                        winston.log("verbose", "store this cameraStream " + JSON.stringify(response));
-
-                                        //calculate port
-                                        var localIp = stream.nearIp;
-                                        var subnet = localIp.split(".");
-
-                                        var portStart = 48410;
-                                        var portUnit = 5 - parseInt(subnet[3]);
-
-                                        winston.log("verbose", "portUnit " + portUnit);
-
-
-                                        winston.log("verbose", "edgeConfig " + JSON.stringify(edgeConfig));
-
-                                        var port = portStart + portUnit;
-
-                                        winston.log("verbose", "publicIp " + publicIp);
-
-                                        var data = {
-                                            "streamname": stream.name,
-                                            "publicIp" : publicIp,
-                                            "localIp" : stream.nearIp,
-                                            "port": port
-                                        };
-
-                                        //Store the camera stream
-                                        cameraStream.create(data, function (response) {
-
-                                            winston.log("verbose", "create cameraStream response " + JSON.stringify(response));
-
-                                            if (typeof response[0] !== "undefined") {
-                                                winston.log("verbose", '[evowebservices-sst] camera stream added - data ' + JSON.stringify(data));
-                                            } else {
-
-                                                winston.log("error", '[evowebservices-sst] camera stream not added - data ' + JSON.stringify(data));
-
-                                            }
-
-                                            next();
-
-                                        });
-                                    }else{
-                                        next();
-                                    }
-
-
-                                })
-                            }else{
-                                next();
-                            }
-                        }, function ()
-                        {
-                            winston.log("verbose", "Checking of listStreams for "+localIp+" finished");
-                        });
-
-                    }
-                });
-            }
-
-            res.json(true);
-
-        }
-
-    })
-
-});
+// router.get('/update-camerastreamlist', function (req, res, next) {
+//
+//
+//     //Get the edge information
+//    
+//
+//     var localIp = "10.10.0.6";
+//
+//     var data = {
+//         "publicIp": "13.94.41.184",
+//         "apiproxy": "apiproxy",
+//         "username": "evostream",
+//         "password": "Pa$$word",
+//         "port": "8888"
+//     };
+//
+//
+//     edge.find(localIp, function (response) {
+//
+//         var result = response;
+//
+//         // res.json(result);
+//
+//         if(!result.error){
+//
+//             //build the api proxy url
+//             var serverObject = {
+//                 "localIp": localIp,
+//                 "apiproxy": result.apiproxy,
+//                 "username": result.username,
+//                 "password": result.password,
+//                 "port": result.port
+//             };
+//
+//             var publicIp = result.publicIp;
+//
+//
+//             var apiProxyUrl = getUrlApiProxy(serverObject);
+//
+//             winston.log("verbose", "apiProxyUrl " +apiProxyUrl );
+//
+//             if(apiProxyUrl != ''){
+//
+//                 var ems = require("../core_modules/ems-api-core")(apiProxyUrl);
+//                 var parameters = null;
+//
+//                 ems.listStreams(parameters, function (result) {
+//
+//                     winston.log("verbose", "[evowebservices-sst] AzureStreamManager-SST listConfig result: " + JSON.stringify(result));
+//
+//                     if (result.status == "FAIL" || (result.data == null )) {
+//                         winston.log("error", "[evowebservices-sst] AzureStreamManager-SST listConfig failed result: " + JSON.stringify(result));
+//                     } else {
+//
+//                         var listStreamData = result.data;
+//
+//                         //loop to the liststreamdata
+//                         asyncLoop(listStreamData, function (stream, next)
+//                         {
+//                             winston.log("verbose", "stream " + JSON.stringify(stream));
+//                             // var publicIp = edge.getPublicIp();
+//
+//                             winston.log("verbose", "publicIp " + publicIp);
+//
+//                             if(stream.type == 'INR'){
+//
+//                                 cameraStream.find(stream.name, function (response) {
+//
+//                                     winston.log("verbose", "find cameraStream response " + JSON.stringify(response));
+//
+//                                     if (typeof response ['error'] !== "undefined") {
+//                                         winston.log("error", '[evowebservices-sst] camera stream not added - data ' + JSON.stringify(data));
+//
+//                                         next();
+//                                     }
+//
+//                                     winston.log("verbose", "find cameraStream response response.length " +response.length);
+//
+//                                     if (response.length < 1) {
+//
+//                                         winston.log("verbose", "store this cameraStream " + JSON.stringify(response));
+//
+//                                         //calculate port
+//                                         var localIp = stream.nearIp;
+//                                         var subnet = localIp.split(".");
+//
+//                                         var portStart = 48410;
+//                                         var portUnit = 5 - parseInt(subnet[3]);
+//
+//                                         winston.log("verbose", "portUnit " + portUnit);
+//
+//
+//                                         winston.log("verbose", "edgeConfig " + JSON.stringify(edgeConfig));
+//
+//                                         var port = portStart + portUnit;
+//
+//                                         winston.log("verbose", "publicIp " + publicIp);
+//
+//                                         var data = {
+//                                             "streamname": stream.name,
+//                                             "publicIp" : publicIp,
+//                                             "localIp" : stream.nearIp,
+//                                             "port": port
+//                                         };
+//
+//                                         //Store the camera stream
+//                                         cameraStream.create(data, function (response) {
+//
+//                                             winston.log("verbose", "create cameraStream response " + JSON.stringify(response));
+//
+//                                             if (typeof response[0] !== "undefined") {
+//                                                 winston.log("verbose", '[evowebservices-sst] camera stream added - data ' + JSON.stringify(data));
+//                                             } else {
+//
+//                                                 winston.log("error", '[evowebservices-sst] camera stream not added - data ' + JSON.stringify(data));
+//
+//                                             }
+//
+//                                             next();
+//
+//                                         });
+//                                     }else{
+//                                         next();
+//                                     }
+//
+//
+//                                 })
+//                             }else{
+//                                 next();
+//                             }
+//                         }, function ()
+//                         {
+//                             winston.log("verbose", "Checking of listStreams for "+localIp+" finished");
+//                         });
+//
+//                     }
+//                 });
+//             }
+//
+//             res.json(true);
+//
+//         }
+//
+//     })
+//
+// });
 
 var getUrlApiProxy = function (serverObject) {
 

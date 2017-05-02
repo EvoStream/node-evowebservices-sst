@@ -19,7 +19,7 @@ exports.create = function (camerastream, next) {
         //get the users collection
         camerastreams = db.getCollection('camerastreams');
 
-        if ((typeof(camerastreams) == "undefined") || camerastreams == null) {
+        if ((typeof(camerastreams) == "undefined") || camerastreams === null) {
 
             //add the camerastreams collection if it does not exist
             camerastreams = db.addCollection('camerastreams');
@@ -71,7 +71,7 @@ exports.find = function (streamname, camerastream) {
 
         // winston.log("verbose", "camerastreams " + JSON.stringify(camerastreams));
 
-        if ((typeof(camerastreams) == "undefined") || camerastreams == null) {
+        if ((typeof(camerastreams) == "undefined") || camerastreams === null) {
             var response = {
                 error: 'there are no existing camera streams'
             };
@@ -85,7 +85,7 @@ exports.find = function (streamname, camerastream) {
 
             var result = updatedCameraStreamList.data();
 
-            if(!result){
+            if(!result || result.length == 0){
                 var response = {
                     error: 'there are no existing camera streams'
                 };
@@ -111,7 +111,7 @@ exports.find = function (streamname, camerastream) {
 
         // winston.log("verbose", "camerastreams " + JSON.stringify(camerastreams));
 
-        if ((typeof(camerastreams) == "undefined") || camerastreams == null) {
+        if ((typeof(camerastreams) == "undefined") || camerastreams === null ) {
             var response = {
                 error: 'there are no existing camera streams'
             };
@@ -125,7 +125,7 @@ exports.find = function (streamname, camerastream) {
 
             var result = updatedCameraStreamList.data();
 
-            if(!result){
+            if(!result || result.length == 0){
                 var response = {
                     error: 'there are no existing camera streams'
                 };
@@ -150,7 +150,7 @@ exports.findByLocalIpAndRemove = function (localIp, camerastream) {
         //get the users collection
         var camerastreams = db.getCollection('camerastreams');
 
-        if ((typeof(camerastreams) == "undefined") || camerastreams == null) {
+        if ((typeof(camerastreams) == "undefined") || camerastreams === null) {
             var response = {
                 error: 'there are no existing camera streams'
             };
@@ -166,7 +166,7 @@ exports.findByLocalIpAndRemove = function (localIp, camerastream) {
             var updatedCameraStreamList = camerastreams.addDynamicView('updatedCameraStreamListView');
             var result = updatedCameraStreamList.data();
 
-            if(!result){
+            if(!result || result.length == 0){
                 var response = {
                     error: 'there are no existing camera streams'
                 };
@@ -190,7 +190,7 @@ exports.showAll = function (result) {
         //get the users collection
         var camerastreams = db.getCollection('camerastreams');
 
-        if ((typeof(camerastreams) == "undefined") || camerastreams == null) {
+        if ((typeof(camerastreams) == "undefined") || camerastreams === null) {
             var response = {
                 error: 'there are no existing camera streams'
             };

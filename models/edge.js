@@ -75,7 +75,7 @@ exports.find = function (localIp, edge) {
         //get the users collection
         var edges = db.getCollection('edge');
 
-        if ((typeof(edges) == "undefined") || edges == null) {
+        if ((typeof(edges) == "undefined") || edges === null) {
             var response = {
                 error: 'there are no existing edges'
             };
@@ -85,7 +85,7 @@ exports.find = function (localIp, edge) {
         } else {
             var result = edges.findOne({"localIps": { '$contains' : localIp }});
 
-            if(!result){
+            if(!result || result.length == 0){
                 var response = {
                     error: 'there are no existing camera streams'
                 };
@@ -178,7 +178,7 @@ exports.getPublicIp = function () {
         } else {
             var edgeData = edges.addDynamicView('edgeDataView');
 
-            if(!result){
+            if(!result || result.length == 0){
                 var response = {
                     error: 'there are no existing camera streams'
                 };
