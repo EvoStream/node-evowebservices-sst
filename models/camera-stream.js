@@ -58,55 +58,13 @@ exports.create = function (camerastream, next) {
 };
 
 exports.find = function (streamname, camerastream) {
-    
-    winston.log("info", '[evowebservices-sst] find camera stream');
-
-    //load the database
-    db.loadDatabase({}, function () {
-
-        winston.log("verbose", "[evowebservices-sst] database loaded ");
-
-        //get the users collection
-        var camerastreams = db.getCollection('camerastreams');
-
-        // winston.log("verbose", "camerastreams " + JSON.stringify(camerastreams));
-
-        if ((typeof(camerastreams) == "undefined") || camerastreams === null) {
-            var response = {
-                error: 'there are no existing camera streams'
-            };
-            winston.log("error", '[evowebservices-sst] find - there are no existing camera streams');
-            return camerastream(response);
-
-        } else {
-
-            var updatedCameraStreamList = camerastreams.addDynamicView('updatedCameraStreamListView');
-            updatedCameraStreamList.applyFind({'streamname': streamname});
-
-            var result = updatedCameraStreamList.data();
-
-            if(!result || result.length == 0){
-                var response = {
-                    error: 'there are no existing camera streams'
-                };
-                winston.log("error", '[evowebservices-sst] find - there are no existing camera streams');
-                return camerastream(response);
-            }
-
-            return camerastream(result);
-        }
-
-    });
-};
-
-exports.find = function (streamname, camerastream) {
 
     winston.log("info", '[evowebservices-sst] find camera stream');
 
     //load the database
     db.loadDatabase({}, function () {
 
-        //get the users collection
+        //get the camera streams collection
         var camerastreams = db.getCollection('camerastreams');
 
         // winston.log("verbose", "camerastreams " + JSON.stringify(camerastreams));
@@ -138,6 +96,51 @@ exports.find = function (streamname, camerastream) {
 
     });
 };
+
+
+exports.delete = function (streamname, camerastream) {
+
+    winston.log("info", '[evowebservices-sst] delete camera stream');
+
+    //load the database
+    db.loadDatabase({}, function () {
+
+        //get the users collection
+        var camerastreams = db.getCollection('camerastreams');
+
+        // winston.log("verbose", "camerastreams " + JSON.stringify(camerastreams));
+
+        if ((typeof(camerastreams) == "undefined") || camerastreams === null ) {
+            var response = {
+                error: 'there are no existing camera streams'
+            };
+            winston.log("error", '[evowebservices-sst] find - there are no existing camera streams');
+            return camerastream(response);
+
+        } else {
+
+
+            var deleteCameraStream = camerastreams.findOne({'streamname': streamname});
+
+            winston.log("verbose", "deleteCameraStream " + JSON.stringify(deleteCameraStream));
+
+            camerastreams.remove(deleteCameraStream);
+
+            //save the database
+            db.saveDatabase();
+
+            var deletedStatusResponse = {
+                "status": true,
+                "message": "camera stream deleted - "+streamname
+            };
+            winston.log("error", '[evowebservices-sst] camera stream deleted - '+streamname);
+            return camerastream(deletedStatusResponse);
+            
+        }
+
+    });
+};
+
 
 
 exports.findByLocalIpAndRemove = function (localIp, camerastream) {

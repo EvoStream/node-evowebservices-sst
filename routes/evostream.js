@@ -119,6 +119,21 @@ router.post('/', function (req, res, next) {
         });
     }
 
+    if (eventType == 'inStreamClosed') {
+
+        var streamname = event.name;
+
+        cameraStream.delete(streamname, function (response) {
+
+            winston.log("verbose", "remove-stream - response  " + JSON.stringify(response));
+
+            var result = response;
+
+            res.json(result);
+
+        });
+
+    }
 
     if (eventType == 'vmCreated') {
 
@@ -398,6 +413,7 @@ router.get('/show-all', function (req, res, next) {
 
 });
 
+
 /*
  FOR TESTING
  */
@@ -429,6 +445,30 @@ router.get('/remove-testing', function (req, res, next) {
         });
 
     }
+});
+
+
+
+router.get('/remove-stream', function (req, res, next) {
+
+    // var name = req.body.name;
+    //
+    // console.log('name '+name );
+
+    winston.log("verbose", "remove-stream remove-stream remove-stream remove-stream remove-stream  " );
+
+    var streamname = 'mystream01-01';
+
+    cameraStream.delete(streamname, function (response) {
+
+        winston.log("verbose", "remove-stream - response  " + JSON.stringify(response));
+
+        var result = response;
+
+        res.json(result);
+
+    });
+
 });
 
 
