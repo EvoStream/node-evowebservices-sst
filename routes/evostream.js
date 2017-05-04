@@ -121,7 +121,7 @@ router.post('/', function (req, res, next) {
 
     if (eventType == 'inStreamClosed') {
 
-        var streamname = event.name;
+        var streamname = event.payload.name;
 
         cameraStream.delete(streamname, function (response) {
 
