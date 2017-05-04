@@ -100,7 +100,7 @@ exports.find = function (streamname, camerastream) {
 
 exports.delete = function (streamname, camerastream) {
 
-    winston.log("info", '[evowebservices-sst] delete camera stream');
+    winston.log("info", '[evowebservices-sst] delete camera stream '+streamname); 
 
     //load the database
     db.loadDatabase({}, function () {
@@ -124,7 +124,7 @@ exports.delete = function (streamname, camerastream) {
 
             winston.log("verbose", "deleteCameraStream " + JSON.stringify(deleteCameraStream));
 
-            if(deleteCameraStream !== null || deleteCameraStream.length != 0){
+            if(deleteCameraStream !== null){
                 camerastreams.remove(deleteCameraStream);
 
                 //save the database
