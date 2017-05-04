@@ -124,16 +124,26 @@ exports.delete = function (streamname, camerastream) {
 
             winston.log("verbose", "deleteCameraStream " + JSON.stringify(deleteCameraStream));
 
-            camerastreams.remove(deleteCameraStream);
+            if(deleteCameraStream !== null || deleteCameraStream.length != 0){
+                camerastreams.remove(deleteCameraStream);
 
-            //save the database
-            db.saveDatabase();
+                //save the database
+                db.saveDatabase();
 
-            var deletedStatusResponse = {
-                "status": true,
-                "message": "camera stream deleted - "+streamname
-            };
-            winston.log("error", '[evowebservices-sst] camera stream deleted - '+streamname);
+                var deletedStatusResponse = {
+                    "status": true,
+                    "message": "camera stream deleted - "+streamname
+                };
+                winston.log("info", '[evowebservices-sst] camera stream deleted - '+streamname);
+            }else{
+                var deletedStatusResponse = {
+                    "status": true,
+                    "message": "no camera stream deleted - "+streamname
+                };
+                winston.log("info", '[evowebservices-sst] camera stream deleted - '+streamname);
+            }
+
+
             return camerastream(deletedStatusResponse);
             
         }
