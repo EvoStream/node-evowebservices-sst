@@ -3,7 +3,13 @@ var loki = require('lokijs');
 
 var winston = require('winston');
 
-var db = new loki(path.join(__dirname, '../data/camerastream.json'));
+// var db = new loki(path.join(__dirname, '../data/camerastream.json'));
+
+
+var db = new loki(path.join(__dirname, '../data/camerastream.json'),
+    {
+        autoload: true
+    });
 
 /*
  * Local User

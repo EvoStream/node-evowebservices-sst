@@ -3,7 +3,12 @@ var loki = require('lokijs');
 
 var winston = require('winston');
 
-var db = new loki(path.join(__dirname, '../data/edge.json'));
+// var db = new loki(path.join(__dirname, '../data/edge.json'));
+
+var db = new loki(path.join(__dirname, '../data/edge.json'),
+    {
+        autoload: true
+    });
 
 /*
  * Create Edge

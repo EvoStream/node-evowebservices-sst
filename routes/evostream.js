@@ -165,6 +165,21 @@ router.post('/', function (req, res, next) {
 
     }
 
+    if (eventType == 'vmDestroying') {
+
+        winston.log("info", '[evowebservices-sst] AzureStreamManager-SST vmDestroying');
+        winston.log("info", '[evowebservices-sst] AzureStreamManager-SST vmDestroying event ' + JSON.stringify(event));
+
+        var localIp = event.localIp;
+        var url = req.protocol + "://" + req.get('host') + "/evostream/remove?localip="+localIp;
+
+        request.get(url, function(err, response) {
+
+            winston.log("verbose", "serverStopping - edge deletion response: " + JSON.stringify(response));
+
+        });
+    }
+
     if (eventType == 'serverStarted') {
 
         winston.log("info", '[evowebservices-sst] AzureStreamManager-SST serverStarted');
